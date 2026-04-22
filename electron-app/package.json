@@ -1,0 +1,49 @@
+{
+  "name": "sie-generator",
+  "version": "1.0.0",
+  "description": "SIE Generator",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder build --win"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.3"
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.sietools.sie-generator",
+    "productName": "SIE Generator",
+    "directories": {
+      "output": "dist"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "HugoWalldno",
+      "repo": "sie-generator"
+    },
+    "win": {
+      "target": "nsis",
+      "sign": false,
+      "requestedExecutionLevel": "requireAdministrator"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "styles.css",
+      "app.js",
+      "sie-generator.js",
+      "package.json"
+    ]
+  }
+}

@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+out/
+build/
+
+# Electron builder artifacts
+*.exe
+*.msi
+*.dmg
+*.AppImage
+*.snap
+*.deb
+*.rpm
+*.zip
+*.tar.gz
+latest.yml
+latest-mac.yml
+latest-linux.yml
+
+# Environment & secrets
+.env
+.env.*
+*.pfx
+*.p12
+*.key
+*.pem
+
+# IDE & OS
+.vscode/settings.json
+.vscode/launch.json
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+
+# .NET / WPF build output
+**/bin/
+**/obj/
+*.user
+*.suo
+.vs/
+
+# Frontend
+frontend/sie-generator/node_modules/
+frontend/sie-generator/dist/
+frontend/sie-generator/.next/
+frontend/sie-generator/build/

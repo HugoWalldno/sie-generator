@@ -1,0 +1,128 @@
+<div class="container">
+  <header>
+    <h1>SIE Mockdatagenerator</h1>
+    <p class="subtitle">{{ labels().subtitle }}</p>
+    <div class="lang-toggle">
+      <button [class.active]="lang() === 'sv'" (click)="lang.set('sv')" title="Svenska">🇸🇪</button>
+      <button [class.active]="lang() === 'en'" (click)="lang.set('en')" title="English">🇬🇧</button>
+    </div>
+  </header>
+
+  <div class="card form-card">
+    <h2>{{ labels().settings }}</h2>
+
+    <div class="form-grid">
+
+      <!-- SIE Type -->
+      <div class="field full">
+        <label>{{ labels().sieType }}</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" [(ngModel)]="request.sieType" [value]="1" name="sieType" />
+            {{ labels().sie1 }}
+          </label>
+          <label class="radio-label">
+            <input type="radio" [(ngModel)]="request.sieType" [value]="4" name="sieType" />
+            {{ labels().sie4 }}
+          </label>
+        </div>
+      </div>
+
+      <!-- Company type -->
+      <div class="field full">
+        <label for="companyType">{{ labels().companyType }}</label>
+        <select id="companyType" [(ngModel)]="request.companyType">
+          @for (ct of companyTypes(); track ct.value) {
+            <option [value]="ct.value">{{ ct.label }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Company -->
+      <div class="field">
+        <label for="companyName">{{ labels().companyName }} <span class="hint">({{ labels().leaveEmpty }})</span></label>
+        <input id="companyName" type="text" [(ngModel)]="request.companyName" placeholder="Exempelbolaget AB" />
+      </div>
+
+      <div class="field">
+        <label for="orgNumber">{{ labels().orgNumber }} <span class="hint">({{ labels().leaveEmpty }})</span></label>
+        <input id="orgNumber" type="text" [(ngModel)]="request.orgNumber" placeholder="556000-1234" />
+      </div>
+
+      <!-- Fiscal years -->
+      <div class="field full">
+        <label>{{ labels().prevFiscalYear }} <span class="hint">(RAR -1)</span></label>
+        <div class="date-range">
+          <input type="date" [(ngModel)]="previousYearStart" />
+          <span class="date-sep">–</span>
+          <input type="date" [(ngModel)]="previousYearEnd" />
+        </div>
+      </div>
+
+      <div class="field full">
+        <label>{{ labels().currFiscalYear }} <span class="hint">(RAR 0)</span></label>
+        <div class="date-range">
+          <input type="date" [(ngModel)]="currentYearStart" />
+          <span class="date-sep">–</span>
+          <input type="date" [(ngModel)]="currentYearEnd" />
+        </div>
+      </div>
+
+      <!-- Account plan -->
+      <div class="field">
+        <label for="accountPlan">{{ labels().accountPlan }}</label>
+        <select id="accountPlan" [(ngModel)]="request.accountPlanType">
+          @for (plan of accountPlans; track plan) {
+            <option [value]="plan">{{ plan }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Number of accounts -->
+      <div class="field">
+        <label for="numAccounts">{{ labels().numAccounts }}</label>
+        <input id="numAccounts" type="number" [(ngModel)]="request.numberOfAccounts" min="5" max="50" />
+      </div>
+
+      <!-- Number of vouchers (SIE 4 only) -->
+      @if (isSie4()) {
+        <div class="field">
+          <label for="numVouchers">{{ labels().numVouchers }}</label>
+          <input id="numVouchers" type="number" [(ngModel)]="request.numberOfVouchers" min="1" max="2000" />
+        </div>
+      }
+
+      <!-- Seed -->
+      <div class="field">
+        <label for="seed">Seed <span class="hint">({{ labels().seedHint }})</span></label>
+        <input id="seed" type="number" [(ngModel)]="request.seed" placeholder="Slumpmässigt" />
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" (click)="generate()" [disabled]="loading()">
+        @if (loading()) { {{ labels().generating }} } @else { {{ labels().generatePreview }} }
+      </button>
+    </div>
+  </div>
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+
+  <!-- Result -->
+  @if (result(); as res) {
+    <div class="card result-card">
+      <div class="result-header">
+        <h2>{{ res.filename }}</h2>
+        <button class="btn btn-download" (click)="download()" [disabled]="loading()">
+          &#8595; {{ labels().download }}
+        </button>
+      </div>
+      <pre class="sie-preview">{{ res.content }}</pre>
+    </div>
+  }
+</div>
+

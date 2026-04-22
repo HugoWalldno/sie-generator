@@ -1,0 +1,322 @@
+<Window x:Class="SIEGenerator.WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SIE Mockdatagenerator"
+        Height="720" Width="1200"
+        MinHeight="520" MinWidth="820"
+        Background="#F5F5F5"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+
+        <!-- Field label style -->
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+
+        <!-- Default TextBox style -->
+        <Style TargetType="TextBox">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="BorderBrush" Value="#CED4DA"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Default ComboBox style -->
+        <Style TargetType="ComboBox">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="BorderBrush" Value="#CED4DA"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <!-- Default DatePicker style -->
+        <Style TargetType="DatePicker">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <!-- Primary (blue) button -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="#0D6EFD"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#0B5ED7"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#0A58CA"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#6EA8FE"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Success (green) button -->
+        <Style x:Key="SuccessButton" TargetType="Button">
+            <Setter Property="Background" Value="#198754"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#157347"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#146C43"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#75B798"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="390" MinWidth="300" MaxWidth="540"/>
+            <ColumnDefinition Width="4"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ═══════════════════ LEFT PANEL: Form ═══════════════════ -->
+        <Border Grid.Column="0" Background="White"
+                BorderBrush="#DEE2E6" BorderThickness="0,0,1,0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="24,20,24,28">
+
+                    <!-- Header -->
+                    <TextBlock Text="SIE Mockdatagenerator"
+                               FontSize="20" FontWeight="Bold"
+                               Margin="0,0,0,4"/>
+                    <TextBlock Text="Generera SIE-testfiler med slumpmässig data"
+                               Foreground="#6C757D" FontSize="13"
+                               Margin="0,0,0,24"/>
+
+                    <!-- SIE Type -->
+                    <TextBlock Text="SIE-typ" Style="{StaticResource FieldLabel}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
+                        <RadioButton x:Name="SieType1Radio"
+                                     Content="SIE 1 – saldon"
+                                     IsChecked="True"
+                                     FontSize="13"
+                                     Margin="0,0,20,0"
+                                     Checked="SieTypeRadio_Changed"/>
+                        <RadioButton x:Name="SieType4Radio"
+                                     Content="SIE 4 – verifikationer"
+                                     FontSize="13"
+                                     Checked="SieTypeRadio_Changed"/>
+                    </StackPanel>
+
+                    <!-- Company Type -->
+                    <TextBlock Text="Företagstyp" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox x:Name="CompanyTypeCombo" Margin="0,0,0,16">
+                        <ComboBoxItem Content="Aktiebolag (AB)"            Tag="AB"/>
+                        <ComboBoxItem Content="Enskild firma (E)"          Tag="E"/>
+                        <ComboBoxItem Content="Ekonomisk förening (EK)"    Tag="EK"/>
+                        <ComboBoxItem Content="Bostadsrättsförening (BRF)" Tag="BRF"/>
+                        <ComboBoxItem Content="Handelsbolag (HB)"          Tag="HB"/>
+                        <ComboBoxItem Content="Kommanditbolag (KB)"        Tag="KB"/>
+                    </ComboBox>
+
+                    <!-- Company Name -->
+                    <TextBlock Style="{StaticResource FieldLabel}">
+                        Företagsnamn
+                        <Run Foreground="#6C757D" FontWeight="Normal">(lämna tomt för slumpmässigt)</Run>
+                    </TextBlock>
+                    <TextBox x:Name="CompanyNameBox" Margin="0,0,0,16"/>
+
+                    <!-- Org Number -->
+                    <TextBlock Style="{StaticResource FieldLabel}">
+                        Organisationsnummer
+                        <Run Foreground="#6C757D" FontWeight="Normal">(lämna tomt)</Run>
+                    </TextBlock>
+                    <TextBox x:Name="OrgNumberBox" Margin="0,0,0,18"/>
+
+                    <Separator Margin="0,0,0,18" Background="#E9ECEF"/>
+
+                    <!-- Previous Fiscal Year -->
+                    <TextBlock Style="{StaticResource FieldLabel}">
+                        Föregående räkenskapsår
+                        <Run Foreground="#6C757D" FontWeight="Normal">(RAR -1)</Run>
+                    </TextBlock>
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <DatePicker x:Name="PrevYearStart" Grid.Column="0"/>
+                        <TextBlock Grid.Column="1" Text="–"
+                                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   FontSize="16" Foreground="#6C757D"/>
+                        <DatePicker x:Name="PrevYearEnd" Grid.Column="2"/>
+                    </Grid>
+
+                    <!-- Current Fiscal Year -->
+                    <TextBlock Style="{StaticResource FieldLabel}">
+                        Innevarande räkenskapsår
+                        <Run Foreground="#6C757D" FontWeight="Normal">(RAR 0)</Run>
+                    </TextBlock>
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <DatePicker x:Name="CurrYearStart" Grid.Column="0"/>
+                        <TextBlock Grid.Column="1" Text="–"
+                                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   FontSize="16" Foreground="#6C757D"/>
+                        <DatePicker x:Name="CurrYearEnd" Grid.Column="2"/>
+                    </Grid>
+
+                    <Separator Margin="0,0,0,18" Background="#E9ECEF"/>
+
+                    <!-- Account Plan -->
+                    <TextBlock Text="Kontoplan" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox x:Name="AccountPlanCombo" Margin="0,0,0,16">
+                        <ComboBoxItem Content="BAS2020"/>
+                        <ComboBoxItem Content="BAS2025"/>
+                        <ComboBoxItem Content="BAS2016"/>
+                        <ComboBoxItem Content="EUBAS97"/>
+                        <ComboBoxItem Content="NE2007"/>
+                    </ComboBox>
+
+                    <!-- Number of accounts -->
+                    <TextBlock Style="{StaticResource FieldLabel}">
+                        Antal konton
+                        <Run Foreground="#6C757D" FontWeight="Normal">(5–50)</Run>
+                    </TextBlock>
+                    <TextBox x:Name="NumAccountsBox" Text="20" Margin="0,0,0,16"/>
+
+                    <!-- Number of vouchers — SIE 4 only -->
+                    <StackPanel x:Name="VouchersPanel" Visibility="Collapsed">
+                        <TextBlock Style="{StaticResource FieldLabel}">
+                            Antal verifikationer
+                            <Run Foreground="#6C757D" FontWeight="Normal">(1–2000)</Run>
+                        </TextBlock>
+                        <TextBox x:Name="NumVouchersBox" Text="30" Margin="0,0,0,16"/>
+                    </StackPanel>
+
+                    <!-- Seed -->
+                    <TextBlock Style="{StaticResource FieldLabel}">
+                        Seed
+                        <Run Foreground="#6C757D" FontWeight="Normal">(lämna tomt för slumpmässigt)</Run>
+                    </TextBlock>
+                    <TextBox x:Name="SeedBox" Margin="0,0,0,24"/>
+
+                    <!-- Generate button -->
+                    <Button x:Name="GenerateButton"
+                            Content="Generera förhandsvisning"
+                            Style="{StaticResource PrimaryButton}"
+                            Click="GenerateButton_Click"/>
+
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- GridSplitter -->
+        <GridSplitter Grid.Column="1" Width="4"
+                      HorizontalAlignment="Stretch"
+                      Background="#DEE2E6"
+                      Cursor="SizeWE"
+                      ResizeBehavior="PreviousAndNext"/>
+
+        <!-- ═══════════════════ RIGHT PANEL: Preview ═══════════════════ -->
+        <Grid Grid.Column="2" Background="#1E1E1E">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Toolbar shown after generation -->
+            <Border x:Name="ResultHeader"
+                    Grid.Row="0"
+                    Background="#252526"
+                    BorderBrush="#3C3C3C"
+                    BorderThickness="0,0,0,1"
+                    Padding="16,8"
+                    Visibility="Collapsed">
+                <DockPanel>
+                    <Button x:Name="SaveButton"
+                            Content="↓  Spara fil (.se)"
+                            Style="{StaticResource SuccessButton}"
+                            DockPanel.Dock="Right"
+                            Click="SaveButton_Click"/>
+                    <TextBlock x:Name="FilenameLabel"
+                               VerticalAlignment="Center"
+                               FontSize="13" FontWeight="SemiBold"
+                               Foreground="#CCCCCC"
+                               FontFamily="Consolas"
+                               TextTrimming="CharacterEllipsis"/>
+                </DockPanel>
+            </Border>
+
+            <!-- Placeholder text (before first generation) -->
+            <TextBlock x:Name="PlaceholderText"
+                       Grid.Row="1"
+                       Text="Konfigurera inställningarna till vänster och klicka Generera för att förhandsgranska SIE-filen."
+                       Foreground="#555555" FontSize="15"
+                       TextWrapping="Wrap" MaxWidth="340"
+                       TextAlignment="Center"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+            <!-- SIE content preview -->
+            <ScrollViewer x:Name="PreviewScroll"
+                          Grid.Row="1"
+                          Visibility="Collapsed"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Auto">
+                <TextBox x:Name="PreviewBox"
+                         FontFamily="Consolas" FontSize="12"
+                         IsReadOnly="True" AcceptsReturn="True"
+                         BorderThickness="0"
+                         Background="#1E1E1E" Foreground="#D4D4D4"
+                         Padding="16"
+                         TextWrapping="NoWrap"
+                         Height="Auto"
+                         VerticalContentAlignment="Top"/>
+            </ScrollViewer>
+
+        </Grid>
+    </Grid>
+</Window>

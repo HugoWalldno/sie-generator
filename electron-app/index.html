@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'" />
+  <title>SIE Generator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Header ── -->
+  <header class="header">
+    <div class="header-brand">
+      <div class="header-logo">
+        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="14" height="3" rx="1.5" fill="white" opacity="0.9"/>
+          <rect x="2" y="7" width="10" height="3" rx="1.5" fill="white" opacity="0.7"/>
+          <rect x="2" y="12" width="12" height="3" rx="1.5" fill="white" opacity="0.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="header-title">SIE Generator</div>
+        <div class="header-subtitle" id="hdr-subtitle">Generera testfiler för SIE 1 och SIE 4</div>
+      </div>
+    </div>
+    <div class="header-controls">
+      <div class="lang-seg">
+        <button id="btn-sv" class="active" onclick="setLang('sv')">SV</button>
+        <button id="btn-en" onclick="setLang('en')">EN</button>
+      </div>
+      <button class="icon-btn" id="theme-btn" title="Byt tema">
+        <svg id="icon-dark" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 12.5A5.5 5.5 0 1 1 8 2.5a5.5 5.5 0 0 1 0 11z"/>
+          <circle cx="8" cy="8" r="3"/>
+        </svg>
+        <svg id="icon-light" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="display:none">
+          <path d="M8 3a5 5 0 1 0 0 10A5 5 0 0 0 8 3zM8 0a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V1a1 1 0 0 1 1-1zm0 13a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1zM3.05 3.05a1 1 0 0 1 1.414 0l.707.707a1 1 0 1 1-1.414 1.414l-.707-.707a1 1 0 0 1 0-1.414zm8.485 8.485a1 1 0 0 1 1.414 0l.707.707a1 1 0 1 1-1.414 1.414l-.707-.707a1 1 0 0 1 0-1.414zM0 8a1 1 0 0 1 1-1h1a1 1 0 0 1 0 2H1a1 1 0 0 1-1-1zm13 0a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2h-1a1 1 0 0 1-1-1zM3.05 12.95a1 1 0 0 1 0-1.414l.707-.707a1 1 0 1 1 1.414 1.414l-.707.707a1 1 0 0 1-1.414 0zM11.536 4.464a1 1 0 0 1 0-1.414l.707-.707a1 1 0 1 1 1.414 1.414l-.707.707a1 1 0 0 1-1.414 0z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Main layout ── -->
+  <div class="main">
+
+    <!-- ─ Left: Settings ─ -->
+    <div class="settings-panel">
+      <div class="panel-title" id="lbl-settings">Inställningar</div>
+
+      <!-- SIE Type -->
+      <div class="card">
+        <div class="field">
+          <label class="field-label" id="lbl-sie-type">SIE-typ</label>
+          <div class="seg-ctrl">
+            <input type="radio" name="sieType" id="sie1" value="1" />
+            <label for="sie1" id="lbl-sie1">SIE 1 – Saldon</label>
+            <input type="radio" name="sieType" id="sie4" value="4" checked />
+            <label for="sie4" id="lbl-sie4">SIE 4 – Transaktioner</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Company -->
+      <div class="card">
+        <div class="field">
+          <label class="field-label" for="companyType" id="lbl-company-type">Företagsform</label>
+          <select id="companyType">
+            <option value="AB" id="opt-AB">Aktiebolag (AB)</option>
+            <option value="E"  id="opt-E">Enskild firma</option>
+            <option value="EK" id="opt-EK">Ekonomisk förening</option>
+            <option value="BRF" id="opt-BRF">Bostadsrättsförening</option>
+            <option value="HB" id="opt-HB">Handelsbolag (HB)</option>
+            <option value="KB" id="opt-KB">Kommanditbolag (KB)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="companyName">
+            <span id="lbl-company-name">Företagsnamn</span>
+            <span class="hint" id="lbl-leave-empty">(lämna tomt för slumpmässigt)</span>
+          </label>
+          <input type="text" id="companyName" placeholder="Exempelbolaget AB" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="orgNumber">
+            <span id="lbl-org-number">Organisationsnummer</span>
+            <span class="hint">(lämna tomt för slumpmässigt)</span>
+          </label>
+          <input type="text" id="orgNumber" placeholder="556000-1234" />
+        </div>
+      </div>
+
+      <!-- Fiscal years -->
+      <div class="card">
+        <div class="field">
+          <label class="field-label">
+            <span id="lbl-prev-year">Föregående räkenskapsår</span>
+            <span class="hint">(RAR -1)</span>
+          </label>
+          <div class="date-range">
+            <input type="date" id="prevYearStart" />
+            <span class="date-sep">–</span>
+            <input type="date" id="prevYearEnd" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">
+            <span id="lbl-curr-year">Innevarande räkenskapsår</span>
+            <span class="hint">(RAR 0)</span>
+          </label>
+          <div class="date-range">
+            <input type="date" id="currYearStart" />
+            <span class="date-sep">–</span>
+            <input type="date" id="currYearEnd" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Generation params -->
+      <div class="card">
+        <div class="field">
+          <label class="field-label" for="accountPlan" id="lbl-account-plan">Kontoplan</label>
+          <select id="accountPlan">
+            <option>BAS2020</option>
+            <option>BAS2016</option>
+            <option>EUBAS97</option>
+            <option>BAS96</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" id="lbl-num-accounts">Antal konton (5–50)</label>
+          <div class="num-stepper">
+            <button class="step-btn" onclick="step('numAccounts', -1, 5, 50)">−</button>
+            <input type="number" id="numAccounts" value="20" min="5" max="50" />
+            <button class="step-btn" onclick="step('numAccounts',  1, 5, 50)">+</button>
+          </div>
+        </div>
+        <div class="field" id="vouchers-field">
+          <label class="field-label" id="lbl-num-vouchers">Antal verifikationer (1–2000)</label>
+          <div class="num-stepper">
+            <button class="step-btn" onclick="step('numVouchers', -10, 1, 2000)">−</button>
+            <input type="number" id="numVouchers" value="30" min="1" max="2000" />
+            <button class="step-btn" onclick="step('numVouchers',  10, 1, 2000)">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="seed">
+            Seed
+            <span class="hint" id="lbl-seed-hint">(valfritt, för reproducerbar utdata)</span>
+          </label>
+          <input type="number" id="seed" placeholder="Slumpmässigt" />
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div class="alert-error" id="error-box"></div>
+
+      <!-- Generate -->
+      <button class="btn-generate" id="btn-generate" onclick="generate()">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+          <path d="M7.5 1v2M7.5 12v2M1 7.5h2M12 7.5h2M3.22 3.22l1.41 1.41M10.37 10.37l1.41 1.41M3.22 11.78l1.41-1.41M10.37 4.63l1.41-1.41" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="7.5" cy="7.5" r="2.5" fill="currentColor"/>
+        </svg>
+        <span id="btn-generate-text">Generera förhandsgranskning</span>
+      </button>
+    </div>
+
+    <!-- ─ Right: Preview ─ -->
+    <div class="preview-panel">
+
+      <!-- Empty state -->
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <rect x="6" y="4" width="20" height="24" rx="3" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="10" y1="10" x2="22" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="10" y1="14" x2="18" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="10" y1="18" x2="20" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="10" y1="22" x2="15" y2="22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="empty-title" id="empty-title">Ingen förhandsgranskning</div>
+        <div class="empty-desc" id="empty-desc">Konfigurera inställningarna och klicka på "Generera" för att se SIE-filens innehåll.</div>
+      </div>
+
+      <!-- Result view -->
+      <div class="result-view" id="result-view">
+        <div class="result-bar">
+          <div class="filename-badge">
+            <svg class="filename-badge-icon" width="13" height="13" viewBox="0 0 13 13" fill="currentColor">
+              <path d="M7 1H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V5L7 1zm0 1.5L9.5 5H7V2.5z"/>
+            </svg>
+            <span id="result-filename">export.se</span>
+          </div>
+          <div class="result-meta">
+            <span class="meta-pill" id="result-lines">0 rader</span>
+          </div>
+          <button class="btn-download" id="btn-download" onclick="downloadFile()">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+              <path d="M6 8.5l-3-3h2V1h2v4.5h2L6 8.5zM1 10h10v1H1z"/>
+            </svg>
+            <span id="btn-download-text">Ladda ned .se (CP437)</span>
+          </button>
+        </div>
+        <div class="sie-code" id="sie-code"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="sie-generator.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
