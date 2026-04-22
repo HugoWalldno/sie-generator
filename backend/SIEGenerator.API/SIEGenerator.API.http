@@ -1,6 +1,0 @@
-@SIEGenerator.API_HostAddress = http://localhost:5033
-
-GET {{SIEGenerator.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
