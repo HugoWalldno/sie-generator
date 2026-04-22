@@ -351,9 +351,7 @@ function generateVouchers(rng, accounts, startDate, endDate, count) {
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 function buildSIEFile(request) {
-  const rawSeed = request.seed !== null && request.seed !== undefined && request.seed !== '' ? parseInt(request.seed, 10) : null;
-  const seed = (rawSeed !== null && !isNaN(rawSeed)) ? rawSeed : (Date.now() % 2147483647);
-  const rng = createRng(seed);
+  const rng = createRng(Date.now() % 2147483647);
 
   const companyType = request.companyType || 'AB';
   const pool = getAccountPool(companyType);
@@ -529,7 +527,7 @@ const LABELS = {
     accountPlan: 'Kontoplan',
     numAccounts: 'Antal konton (5–50)',
     numVouchers: 'Antal verifikationer (1–2000)',
-    seedHint: '(valfritt, för reproducerbar utdata)',
+    seedHint: '',
     generating: 'Genererar…',
     generateBtn: 'Generera förhandsgranskning',
     downloadBtn: 'Ladda ned .se (CP437)',
@@ -556,7 +554,7 @@ const LABELS = {
     accountPlan: 'Account plan',
     numAccounts: 'Number of accounts (5–50)',
     numVouchers: 'Number of vouchers (1–2000)',
-    seedHint: '(optional, for reproducible output)',
+    seedHint: '',
     generating: 'Generating…',
     generateBtn: 'Generate preview',
     downloadBtn: 'Download .se (CP437)',
@@ -639,7 +637,6 @@ function applyLabels() {
   document.getElementById('lbl-account-plan').textContent  = L.accountPlan;
   document.getElementById('lbl-num-accounts').textContent  = L.numAccounts;
   document.getElementById('lbl-num-vouchers').textContent  = L.numVouchers;
-  document.getElementById('lbl-seed-hint').textContent     = L.seedHint;
   const genTxt = document.getElementById('btn-generate-text');
   if (genTxt) genTxt.textContent = isLoading ? L.generating : L.generateBtn;
   document.getElementById('btn-download-text').textContent = L.downloadBtn;
@@ -712,7 +709,6 @@ function buildRequest() {
     accountPlanType:  document.getElementById('accountPlan').value,
     numberOfAccounts: parseInt(document.getElementById('numAccounts').value, 10) || 20,
     numberOfVouchers: parseInt(document.getElementById('numVouchers').value, 10) || 30,
-    seed: document.getElementById('seed').value,
   };
 }
 
