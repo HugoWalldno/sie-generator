@@ -1,6 +1,78 @@
 'use strict';
 
-// ─── i18n ─────────────────────────────────────────────────────────────────────
+// ─── Release Notes ────────────────────────────────────────────────────────────
+const LABELS_RN = {
+  sv: { title: "Nyheter", ok: "OK", noNotes: "Inga versionsnoteringar tillgängliga." },
+  en: { title: "What's new", ok: "OK", noNotes: "No release notes available." },
+};
+
+function renderMarkdown(md) {
+  return md
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^[-*] (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>(\n|$))+/g, (m) => `<ul>${m}</ul>`)
+    .replace(/\n{2,}/g, '</p><p>')
+    .replace(/^(?!<[hup])/gm, '')
+    .trim()
+    .replace(/^(.+)$/, '<p>$1</p>');
+}
+
+function openReleaseNotes(version, notes) {
+  const L = LABELS_RN[currentLang];
+  document.getElementById('rn-title').textContent   = L.title;
+  document.getElementById('rn-version').textContent = version || '';
+  document.getElementById('rn-version').style.display = version ? '' : 'none';
+  document.getElementById('rn-body').innerHTML = notes
+    ? renderMarkdown(notes)
+    : `<p style="color:var(--text-muted)">${L.noNotes}</p>`;
+  document.getElementById('rn-ok').textContent = L.ok;
+  document.getElementById('rn-overlay').classList.add('visible');
+}
+
+function closeReleaseNotes() {
+  document.getElementById('rn-overlay').classList.remove('visible');
+}
+
+document.getElementById('rn-close').addEventListener('click', closeReleaseNotes);
+document.getElementById('rn-ok').addEventListener('click', closeReleaseNotes);
+document.getElementById('rn-overlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('rn-overlay')) closeReleaseNotes();
+});
+
+// "What's new" header button — always opens latest notes
+let _cachedRelease = null;
+document.getElementById('whats-new-btn').addEventListener('click', async () => {
+  if (!_cachedRelease) {
+    _cachedRelease = await window.electronAPI.getReleaseNotes().catch(() => ({ version: '', notes: '' }));
+  }
+  openReleaseNotes(_cachedRelease.version, _cachedRelease.notes);
+});
+
+// On startup: show release notes once per version
+(async () => {
+  try {
+    const appVersion = await window.electronAPI.getAppVersion();
+    const seenKey    = `rn-seen-${appVersion}`;
+    if (localStorage.getItem(seenKey)) return;
+
+    const release = await window.electronAPI.getReleaseNotes();
+    _cachedRelease = release;
+
+    if (release && release.notes) {
+      localStorage.setItem(seenKey, '1');
+      document.getElementById('whats-new-btn').classList.add('has-update');
+      openReleaseNotes(release.version, release.notes);
+    }
+  } catch {
+    // silently ignore — app works fine without release notes
+  }
+})();
+
+
 const LABELS = {
   sv: {
     subtitle: 'Generera testfiler för SIE\u00a01 och SIE\u00a04',

@@ -31,6 +31,11 @@
         <button id="btn-sv" class="active" onclick="setLang('sv')">SV</button>
         <button id="btn-en" onclick="setLang('en')">EN</button>
       </div>
+      <button class="icon-btn" id="whats-new-btn" title="What's new">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7.5 1L9.18 5.26L13.75 5.635L10.5 8.435L11.545 12.865L7.5 10.465L3.455 12.865L4.5 8.435L1.25 5.635L5.82 5.26L7.5 1Z"/>
+        </svg>
+      </button>
       <button class="icon-btn" id="theme-btn" title="Byt tema">
         <svg id="icon-dark" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
           <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 12.5A5.5 5.5 0 1 1 8 2.5a5.5 5.5 0 0 1 0 11z"/>
@@ -208,10 +213,32 @@
       </div>
 
     </div>
+  </div><!-- /#main -->
+</div><!-- /#app -->
+
+<!-- ── Release Notes Modal ── -->
+<div class="rn-overlay" id="rn-overlay">
+  <div class="rn-modal">
+    <div class="rn-header">
+      <div class="rn-title-row">
+        <svg width="16" height="16" viewBox="0 0 15 15" fill="currentColor" style="color:var(--primary);flex-shrink:0">
+          <path d="M7.5 1L9.18 5.26L13.75 5.635L10.5 8.435L11.545 12.865L7.5 10.465L3.455 12.865L4.5 8.435L1.25 5.635L5.82 5.26L7.5 1Z"/>
+        </svg>
+        <span class="rn-title" id="rn-title">What's new</span>
+        <span class="rn-version-badge" id="rn-version"></span>
+      </div>
+      <button class="icon-btn" id="rn-close">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="rn-body" id="rn-body"></div>
+    <div class="rn-footer">
+      <button class="btn-generate" id="rn-ok" style="width:auto;padding:8px 24px;">OK</button>
+    </div>
   </div>
 </div>
 
-<script src="sie-generator.js"></script>
+
 <script src="app.js"></script>
 </body>
 </html>

@@ -2,6 +2,7 @@
 
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const { autoUpdater } = require('electron-updater');
+const https = require('https');
 const path = require('path');
 const fs = require('fs');
 
@@ -76,6 +77,30 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+});
+
+ipcMain.handle('get-app-version', () => app.getVersion());
+
+ipcMain.handle('get-release-notes', () => {
+  return new Promise((resolve) => {
+    const options = {
+      hostname: 'api.github.com',
+      path: '/repos/HugoWalldno/sie-generator/releases/latest',
+      headers: { 'User-Agent': 'sie-generator-app' },
+    };
+    https.get(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          resolve({ version: json.tag_name || '', notes: json.body || '' });
+        } catch {
+          resolve({ version: '', notes: '' });
+        }
+      });
+    }).on('error', () => resolve({ version: '', notes: '' }));
+  });
 });
 
 ipcMain.handle('save-file', async (_event, { filename, content }) => {
