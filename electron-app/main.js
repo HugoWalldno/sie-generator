@@ -58,6 +58,11 @@ function createWindow() {
 
   win.loadFile('index.html');
 
+  // Open DevTools with F12 for debugging
+  win.webContents.on('before-input-event', (_e, input) => {
+    if (input.key === 'F12') win.webContents.openDevTools();
+  });
+
   win.once('ready-to-show', () => {
     win.show();
   });
