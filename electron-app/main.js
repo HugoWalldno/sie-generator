@@ -8,6 +8,8 @@ const fs = require('fs');
 
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = true;
+autoUpdater.logger = require('electron-log');
+autoUpdater.logger.transports.file.level = 'info';
 
 // CP437 character map for Swedish characters and common extended ASCII
 const CP437_MAP = {
