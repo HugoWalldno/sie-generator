@@ -69,6 +69,19 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  // Set CSP via response header (more reliable than meta tag in packaged Electron)
+  const { session } = require('electron');
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [
+          "default-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'"
+        ],
+      },
+    });
+  });
+
   createWindow();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
