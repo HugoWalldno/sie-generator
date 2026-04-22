@@ -28,7 +28,7 @@ jobs:
         working-directory: electron-app
 
       - name: Build installer
-        run: npm run dist
+        run: npx electron-builder build --win --publish never
         working-directory: electron-app
 
       - name: Create GitHub Release
