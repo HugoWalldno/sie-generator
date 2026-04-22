@@ -435,8 +435,9 @@ function buildSIEFile(request) {
   return { content, filename };
 }
 
+if (typeof window !== 'undefined') {
+  window.SIEGenerator = { buildSIEFile };
+}
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { buildSIEFile };
-} else {
-  window.SIEGenerator = { buildSIEFile };
 }
