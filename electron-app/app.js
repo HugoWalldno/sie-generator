@@ -380,7 +380,7 @@ function buildSIEFile(request) {
   const accounts = generateBalances(rng, picked);
 
   const vouchers = request.sieType === 4
-    ? generateVouchers(rng, accounts, fyStart, fyEnd, Math.min(Math.max(request.numberOfVouchers || 30, 1), 2000))
+    ? generateVouchers(rng, accounts, fyStart, fyEnd, Math.min(Math.max(request.numberOfVouchers || 30, 1), 20000))
     : [];
 
   // Build SIE file content
@@ -436,7 +436,145 @@ function buildSIEFile(request) {
   return { content, filename };
 }
 
-window.SIEGenerator = { buildSIEFile };
+// ─── Async voucher generation with progress ───────────────────────────────────
+async function generateVouchersAsync(rng, accounts, startDate, endDate, count, onProgress) {
+  const start = parseDate(startDate);
+  const end = parseDate(endDate);
+  const totalDays = Math.max(1, Math.round((end - start) / 86400000));
+  const balAccs = accounts.filter(acc => acc.type === T.Asset || acc.type === T.Liability);
+  const resAccs = accounts.filter(acc => acc.type === T.Revenue || acc.type === T.Cost);
+  if (balAccs.length < 2) return [];
+
+  const series = ['A', 'B', 'C'];
+  const counters = { A: 1, B: 1, C: 1 };
+  const vouchers = [];
+  const CHUNK = 250;
+
+  for (let i = 0; i < count; i++) {
+    const date = new Date(start.getTime() + rng.nextInt(0, totalDays) * 86400000);
+    const desc = VoucherDescriptions[rng.nextInt(0, VoucherDescriptions.length)];
+    const amount = round2(rng.nextDouble() * 50000 + 500);
+    const ser = series[rng.nextInt(0, series.length)];
+    const debit = balAccs[rng.nextInt(0, balAccs.length)];
+
+    let credit;
+    if (resAccs.length > 0 && rng.nextInt(0, 2) === 0) {
+      credit = resAccs[rng.nextInt(0, resAccs.length)];
+    } else {
+      credit = balAccs[rng.nextInt(0, balAccs.length)];
+      let tries = 0;
+      while (credit.number === debit.number && balAccs.length > 1 && tries++ < 10)
+        credit = balAccs[rng.nextInt(0, balAccs.length)];
+    }
+
+    vouchers.push({
+      series: ser, number: counters[ser]++,
+      date: formatDateStr(date), description: desc,
+      transactions: [
+        { accountNumber: debit.number, amount, description: desc },
+        { accountNumber: credit.number, amount: -amount, description: desc },
+      ],
+    });
+
+    if ((i + 1) % CHUNK === 0) {
+      onProgress((i + 1) / count);
+      await new Promise(r => setTimeout(r, 0));
+    }
+  }
+  onProgress(1);
+  return vouchers;
+}
+
+// ─── Async build (used by generate() for progress reporting) ──────────────────
+async function buildSIEFileAsync(request, onProgress) {
+  const rng = createRng(Date.now() % 2147483647);
+
+  const companyType = request.companyType || 'AB';
+  const pool = getAccountPool(companyType);
+
+  const name = (request.companyName && request.companyName.trim())
+    ? request.companyName.trim()
+    : (() => {
+        const base = CompanyNames[rng.nextInt(0, CompanyNames.length)];
+        const suf = CompanySuffixes[companyType] || [''];
+        const s = suf[rng.nextInt(0, suf.length)];
+        return s ? `${base} ${s}` : base;
+      })();
+
+  const orgNumber = (request.orgNumber && request.orgNumber.trim())
+    ? request.orgNumber.trim()
+    : `${rng.nextInt(100000, 999999)}-${rng.nextInt(1000, 9999)}`;
+
+  const thisYear = new Date().getFullYear();
+  const fyStart = request.fiscalYearStart || `${thisYear - 1}0101`;
+  const fyEnd   = request.fiscalYearEnd   || `${thisYear - 1}1231`;
+  const pvStart = request.previousFiscalYearStart || `${thisYear - 2}0101`;
+  const pvEnd   = request.previousFiscalYearEnd   || `${thisYear - 2}1231`;
+
+  const count = Math.min(Math.max(request.numberOfAccounts || 20, 5), pool.length);
+  const picked = pickAccounts(rng, count, pool, companyType);
+  const accounts = generateBalances(rng, picked);
+
+  let vouchers = [];
+  if (request.sieType === 4) {
+    const vCount = Math.min(Math.max(request.numberOfVouchers || 30, 1), 20000);
+    vouchers = await generateVouchersAsync(rng, accounts, fyStart, fyEnd, vCount, onProgress);
+  } else {
+    onProgress(1);
+  }
+
+  const lines = [];
+  const now = new Date();
+  const todayStr = formatDateStr(now);
+  const taxYear = parseInt(fyEnd.slice(0, 4), 10) + 1;
+  const kptyp = mapKptyp(request.accountPlanType);
+
+  lines.push('#FLAGGA 0');
+  lines.push('#FORMAT PC8');
+  lines.push(`#SIETYP ${request.sieType}`);
+  lines.push('#PROGRAM "SIE Generator" 1.0');
+  lines.push(`#GEN ${todayStr}`);
+  lines.push(`#FNAMN ${sieToken(name)}`);
+  lines.push(`#ORGNR ${orgNumber}`);
+  lines.push('#ADRESS "" "" "" ""');
+  lines.push(`#FTYP ${companyType}`);
+  lines.push(`#RAR 0 ${fyStart} ${fyEnd}`);
+  lines.push(`#RAR -1 ${pvStart} ${pvEnd}`);
+  lines.push(`#TAXAR ${taxYear}`);
+  if (request.sieType === 4) lines.push('#VALUTA SEK');
+  lines.push(`#KPTYP ${kptyp}`);
+
+  const sorted = [...accounts].sort((x, y) => x.number.localeCompare(y.number));
+  const ktypMap = { Asset: 'T', Liability: 'S', Revenue: 'I', Cost: 'K' };
+  for (const acc of sorted) {
+    lines.push(`#KONTO ${acc.number} ${sieToken(acc.name)}`);
+    if (ktypMap[acc.type]) lines.push(`#KTYP ${acc.number} ${ktypMap[acc.type]}`);
+  }
+
+  const balAccs2 = sorted.filter(acc => acc.type === T.Asset || acc.type === T.Liability);
+  for (const acc of balAccs2) if (acc.openingBalance !== 0) lines.push(`#IB 0 ${acc.number} ${fmtAmt(acc.openingBalance)}`);
+  for (const acc of balAccs2) if (acc.closingBalance !== 0) lines.push(`#UB 0 ${acc.number} ${fmtAmt(acc.closingBalance)}`);
+
+  const resAccs2 = sorted.filter(acc => acc.type === T.Revenue || acc.type === T.Cost || acc.type === T.Other);
+  for (const acc of resAccs2) if (acc.result !== 0) lines.push(`#RES 0 ${acc.number} ${fmtAmt(acc.result)}`);
+
+  if (request.sieType === 4) {
+    const sortedV = [...vouchers].sort((x, y) => x.series !== y.series ? x.series.localeCompare(y.series) : x.number - y.number);
+    for (const v of sortedV) {
+      lines.push(`#VER ${v.series} ${v.number} ${v.date} ${sieToken(v.description)}`);
+      lines.push('{');
+      for (const t of v.transactions) lines.push(`#TRANS ${t.accountNumber} {} ${fmtAmt(t.amount)}`);
+      lines.push('}');
+    }
+  }
+
+  const content = lines.join('\r\n') + '\r\n';
+  const sieTypeLabel = request.sieType === 4 ? '4' : '1';
+  const filename = `${sanitizeFilename(name)}_SIE${sieTypeLabel}_${fyStart.slice(0, 4)}.se`;
+  return { content, filename };
+}
+
+
 
 // ─── Release Notes ────────────────────────────────────────────────────────────
 const LABELS_RN = {
@@ -526,7 +664,7 @@ const LABELS = {
     currYear: 'Innevarande räkenskapsår',
     accountPlan: 'Kontoplan',
     numAccounts: 'Antal konton (5–50)',
-    numVouchers: 'Antal verifikationer (1–2000)',
+    numVouchers: 'Antal verifikationer (1–20 000)',
     seedHint: '',
     generating: 'Genererar…',
     generateBtn: 'Generera förhandsgranskning',
@@ -553,7 +691,7 @@ const LABELS = {
     currYear: 'Current fiscal year',
     accountPlan: 'Account plan',
     numAccounts: 'Number of accounts (5–50)',
-    numVouchers: 'Number of vouchers (1–2000)',
+    numVouchers: 'Number of vouchers (1–20 000)',
     seedHint: '',
     generating: 'Generating…',
     generateBtn: 'Generate preview',
@@ -713,23 +851,30 @@ function buildRequest() {
 }
 
 // ─── Generate ─────────────────────────────────────────────────────────────────
-window.generate = function generate() {
+window.generate = async function generate() {
   setError(null);
   setLoading(true);
 
-  // Use setTimeout so the UI can repaint before the (synchronous) generation runs
-  setTimeout(() => {
-    try {
-      const req = buildRequest();
-      const result = window.SIEGenerator.buildSIEFile(req);
-      currentResult = result;
-      showResult(result);
-    } catch (e) {
-      setError(e.message || 'Ett fel uppstod vid generering.');
-    } finally {
-      setLoading(false);
-    }
-  }, 30);
+  let progressShown = false;
+  const showTimer = setTimeout(() => {
+    progressShown = true;
+    setProgress(0);
+  }, 60000);
+
+  try {
+    const req = buildRequest();
+    const result = await buildSIEFileAsync(req, (pct) => {
+      if (progressShown) setProgress(pct);
+    });
+    currentResult = result;
+    showResult(result);
+  } catch (e) {
+    setError(e.message || 'Ett fel uppstod vid generering.');
+  } finally {
+    clearTimeout(showTimer);
+    setLoading(false);
+    if (progressShown) setProgress(null);
+  }
 };
 
 // ─── Download ─────────────────────────────────────────────────────────────────
@@ -776,9 +921,25 @@ function setError(msg) {
   el.classList.toggle('visible', !!msg);
 }
 
+function setProgress(pct) {
+  const state = document.getElementById('progress-state');
+  const fill  = document.getElementById('progress-fill');
+  const label = document.getElementById('progress-pct');
+  if (pct === null) {
+    state.classList.remove('visible');
+    return;
+  }
+  state.classList.add('visible');
+  document.getElementById('empty-state').style.display = 'none';
+  const pctInt = Math.round(pct * 100);
+  fill.style.width  = pctInt + '%';
+  label.textContent = pctInt + '%';
+}
+
 function showResult(result) {
   const L = LABELS[currentLang];
   document.getElementById('empty-state').style.display  = 'none';
+  document.getElementById('progress-state').classList.remove('visible');
   const rv = document.getElementById('result-view');
   rv.classList.add('visible');
   document.getElementById('result-filename').textContent = result.filename;
