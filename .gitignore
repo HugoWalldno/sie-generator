@@ -38,16 +38,3 @@ desktop.ini
 # Logs
 *.log
 npm-debug.log*
-
-# .NET / WPF build output
-**/bin/
-**/obj/
-*.user
-*.suo
-.vs/
-
-# Frontend
-frontend/sie-generator/node_modules/
-frontend/sie-generator/dist/
-frontend/sie-generator/.next/
-frontend/sie-generator/build/
